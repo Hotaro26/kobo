@@ -1,8 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Schoolbell&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Comic+Relief&display=swap');
 
 /* Global Font Definition */
 :root {
-  --font-sans: 'Fucek', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: 'Comic Relief', 'Fucek', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.brand-title {
+  position: absolute;
+  top: 32px;
+  left: 40px;
+  font-family: 'Schoolbell', cursive;
+  font-size: 2rem;
+  color: var(--foreground);
+  margin: 0;
+  user-select: none;
+  z-index: 10;
 }
 
 /* Dynamic Theme Configurations */
@@ -1193,6 +1207,12 @@ body {
   }
 
   /* Convert vertical sidebar to bottom navigation bar */
+  .brand-title {
+    top: 16px;
+    left: 20px;
+    font-size: 1.6rem;
+  }
+
   .sidebar {
     width: 100%;
     height: 64px;

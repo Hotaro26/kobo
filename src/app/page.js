@@ -600,6 +600,8 @@ export default function Home() {
 
       {/* MAIN CONTENT */}
       <main className="main-layout">
+        <h1 className="brand-title">kobo</h1>
+        
         {/* Top Centered Action */}
         <div className="top-bar-action" onClick={() => { setIsServicesOpen(!isServicesOpen); addLog(`${isServicesOpen ? 'closed' : 'opened'} supported services dropdown`, 'system'); }}>
           <span>{isServicesOpen ? 'x' : '+'}</span>

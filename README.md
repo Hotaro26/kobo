@@ -16,7 +16,7 @@ A clean, minimal, and fully featured web downloader website powered by Cobalt. I
 
 ---
 
-## Setup & Run
+## Setup & Run (locally)
 
 ### 1. Clone & Install
 ```bash

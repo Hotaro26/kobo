@@ -197,6 +197,9 @@ export default function Home() {
   const [showDetectedToast, setShowDetectedToast] = useState(false);
   const [toastFadeOut, setToastFadeOut] = useState(false);
   
+  // PWA Installation state
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  
   // Gallery carousel state
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
 
@@ -329,9 +332,59 @@ export default function Home() {
       document.body.setAttribute('data-theme', savedTheme);
       addLog(`active colour scheme: ${savedTheme}`, 'system');
     } else {
-      document.body.setAttribute('data-theme', 'classic');
-      addLog('active colour scheme: classic', 'system');
+      // Auto-detect system theme if no saved preference
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = systemPrefersDark ? 'classic' : 'light';
+      setTheme(initialTheme);
+      document.body.setAttribute('data-theme', initialTheme);
+      addLog(`detected system theme: active colour scheme set to ${initialTheme}`, 'system');
     }
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => addLog('registered PWA service worker successfully', 'system'))
+        .catch((err) => console.error('Service worker registration failed:', err));
+    }
+
+    // Check if PWA prompt was already captured by the early layout script
+    if (window.deferredPrompt) {
+      setDeferredPrompt(window.deferredPrompt);
+      addLog('PWA installation prompt is ready (restored)', 'system');
+    }
+
+    // Set callback for early layout script
+    window.onBeforeInstallPrompt = (e) => {
+      setDeferredPrompt(e);
+      addLog('PWA installation prompt is ready (captured)', 'system');
+    };
+
+    // Listen for PWA installation prompt in case it fires later
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      addLog('PWA installation prompt is ready', 'system');
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Listen to system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (e) => {
+      const hasOverride = localStorage.getItem('kobo_theme') !== null;
+      if (!hasOverride) {
+        const newTheme = e.matches ? 'classic' : 'light';
+        setTheme(newTheme);
+        document.body.setAttribute('data-theme', newTheme);
+        addLog(`system theme change detected: switching to ${newTheme} mode`, 'system');
+      }
+    };
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.onBeforeInstallPrompt = null;
+    };
   }, []);
 
   // Update theme dynamically
@@ -651,12 +704,64 @@ export default function Home() {
           </>
         )}
 
-        {/* Top Right Action Button */}
-        <div className="top-right-action">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <polyline points="19 12 12 19 5 12"></polyline>
-          </svg>
+        {/* Top Right Actions (Theme Toggle & PWA Install) */}
+        <div className="top-right-actions-wrapper">
+          {/* PWA Install Button */}
+          {deferredPrompt && (
+            <div 
+              className="top-right-action" 
+              onClick={async () => {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                addLog(`PWA installation: ${outcome}`, 'system');
+                if (outcome === 'accepted') {
+                  setDeferredPrompt(null);
+                }
+              }}
+              title="Install Kobo App"
+              style={{ cursor: 'pointer' }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                <path d="M12 6v6m-3-3 3 3 3-3"></path>
+              </svg>
+            </div>
+          )}
+
+          {/* Theme Toggle Button */}
+          <div 
+            className="top-right-action" 
+            onClick={() => {
+              if (theme === 'light') {
+                const lastDark = localStorage.getItem('kobo_last_dark_theme') || 'classic';
+                handleThemeChange(lastDark);
+              } else {
+                localStorage.setItem('kobo_last_dark_theme', theme);
+                handleThemeChange('light');
+              }
+            }}
+            title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+            style={{ cursor: 'pointer' }}
+          >
+            {theme === 'light' ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            )}
+          </div>
         </div>
 
         {/* Central Core Downloader */}
@@ -665,25 +770,25 @@ export default function Home() {
           <div className="mascot-container">
             <svg width="110" height="110" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
               {/* Ears */}
-              <path d="M25 50L15 20L45 35" stroke="white" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M95 50L105 20L75 35" stroke="white" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M25 50L15 20L45 35" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M95 50L105 20L75 35" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
               {/* Head Outline */}
-              <path d="M25 50C15 65 15 85 30 98C45 110 75 110 90 98C105 85 105 65 95 50C90 42 78 38 60 38C42 38 30 42 25 50Z" fill="black" stroke="white" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M25 50C15 65 15 85 30 98C45 110 75 110 90 98C105 85 105 65 95 50C90 42 78 38 60 38C42 38 30 42 25 50Z" fill="var(--background)" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
               {/* Forehead Stripes */}
-              <path d="M60 46L60 56" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-              <path d="M52 48L55 56" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-              <path d="M68 48L65 56" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+              <path d="M60 46L60 56" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+              <path d="M52 48L55 56" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+              <path d="M68 48L65 56" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
               {/* Eyes */}
-              <path d="M36 68C40 64 45 64 49 68" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-              <path d="M71 68C75 64 80 64 84 68" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+              <path d="M36 68C40 64 45 64 49 68" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+              <path d="M71 68C75 64 80 64 84 68" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
               {/* Cheeks */}
-              <path d="M24 74L30 74" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-              <path d="M96 74L90 74" stroke="white" strokeWidth="3" strokeLinecap="round"/>
+              <path d="M24 74L30 74" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+              <path d="M96 74L90 74" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
               {/* Nose & Mouth */}
-              <path d="M56 76C58 74 62 74 64 76" stroke="white" strokeWidth="4" strokeLinecap="round"/>
-              <path d="M52 83C56 86 60 86 60 83C60 86 64 86 68 83" stroke="white" strokeWidth="4" strokeLinecap="round"/>
+              <path d="M56 76C58 74 62 74 64 76" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+              <path d="M52 83C56 86 60 86 60 83C60 86 64 86 68 83" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
               {/* Paws Folded */}
-              <path d="M42 98C50 94 70 94 78 98" stroke="white" strokeWidth="4.5" strokeLinecap="round"/>
+              <path d="M42 98C50 94 70 94 78 98" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round"/>
             </svg>
           </div>
 
@@ -698,7 +803,7 @@ export default function Home() {
                   <path d="M25 50L15 20L45 35" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M95 50L105 20L75 35" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
                   {/* Head Outline */}
-                  <path d="M25 50C15 65 15 85 30 98C45 110 75 110 90 98C105 85 105 65 95 50C90 42 78 38 60 38C42 38 30 42 25 50Z" fill="black" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M25 50C15 65 15 85 30 98C45 110 75 110 90 98C105 85 105 65 95 50C90 42 78 38 60 38C42 38 30 42 25 50Z" fill="var(--background)" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
                   {/* Forehead Stripes */}
                   <path d="M60 46L60 56" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round"/>
                   <path d="M52 48L55 56" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round"/>
@@ -1117,6 +1222,14 @@ export default function Home() {
                   onClick={() => handleThemeChange('dracula')}
                 >
                   Dracula Pink
+                </button>
+                <button 
+                  type="button" 
+                  className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
+                  style={{ gridColumn: 'span 2' }}
+                  onClick={() => handleThemeChange('light')}
+                >
+                  Light Day Mode
                 </button>
               </div>
             </div>

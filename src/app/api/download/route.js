@@ -75,10 +75,29 @@ function sanitizeCookie(rawCookie) {
   return cleaned;
 }
 
+async function downloadWithEngine(apiUrl, payload) {
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+    },
+    body: JSON.stringify(payload),
+  });
+  
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`API error (${response.status}): ${errText}`);
+  }
+  
+  return await response.json();
+}
+
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { url, quality, format, cookie } = body;
+    const { url, quality, format, cookie, engine } = body;
 
     if (!url) {
       return NextResponse.json(
@@ -87,8 +106,12 @@ export async function POST(request) {
       );
     }
 
-    // Prepare Cobalt API payload
-    const cobaltUrl = process.env.COBALT_API_URL || 'https://hotaro344yy-cobalt-api.hf.space/';
+    console.log('Kobo API: Received request for URL:', url);
+    console.log('Kobo API: Raw cookie length:', cookie ? cookie.length : 0);
+    console.log('Kobo API: Selected engine:', engine || 'cobalt (default)');
+
+    const cobaltUrl = process.env.COBALT_API_URL_ACTUAL || 'https://hotaro344yy-cobalt-api.hf.space/';
+    const ytdlpUrl = process.env.YTDLP_API_URL || 'https://hotaro344yy-ytdlp-api.hf.space/';
     
     const payload = {
       url: url,
@@ -97,35 +120,34 @@ export async function POST(request) {
       downloadMode: format || 'auto',
     };
 
-    // If custom cookies are provided, sanitize and append them to the payload
     if (cookie && cookie.trim()) {
-      const sanitized = sanitizeCookie(cookie);
-      if (sanitized) {
-        payload.cookie = sanitized;
+      payload.cookie = cookie;
+    }
+
+    let data;
+    let usedFallback = false;
+
+    if (engine === 'ytdlp') {
+      console.log('Kobo API: Routing directly to yt-dlp...');
+      data = await downloadWithEngine(ytdlpUrl, payload);
+    } else {
+      try {
+        console.log('Kobo API: Trying Cobalt...');
+        data = await downloadWithEngine(cobaltUrl, payload);
+        if (data && data.status === 'error') {
+          throw new Error(data.text || 'Cobalt returned error status');
+        }
+      } catch (err) {
+        console.warn('Kobo API: Cobalt failed, falling back to yt-dlp. Error:', err.message);
+        data = await downloadWithEngine(ytdlpUrl, payload);
+        usedFallback = true;
       }
     }
 
-    // Make request to Cobalt
-    const response = await fetch(cobaltUrl, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('Cobalt API Error Response:', errText);
-      return NextResponse.json(
-        { status: 'error', text: `Cobalt API error: ${errText}` },
-        { status: response.status }
-      );
+    if (usedFallback) {
+      console.log('Kobo API: Successfully fell back to yt-dlp!');
     }
 
-    const data = await response.json();
     return NextResponse.json(data);
 
   } catch (error) {

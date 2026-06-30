@@ -183,6 +183,7 @@ export default function Home() {
   
   // Customization
   const [theme, setTheme] = useState('classic'); // classic, slate, mocha, dracula
+  const [downloadEngine, setDownloadEngine] = useState('cobalt'); // cobalt, ytdlp
   
   // UI states
   const [isLoading, setIsLoading] = useState(false);
@@ -294,6 +295,12 @@ export default function Home() {
     const savedCookieLegacy = localStorage.getItem('kobo_cookie');
     const savedTheme = localStorage.getItem('kobo_theme');
     const savedQuality = localStorage.getItem('kobo_quality');
+    const savedEngine = localStorage.getItem('kobo_engine');
+    
+    if (savedEngine) {
+      setDownloadEngine(savedEngine);
+      addLog(`loaded selected download engine: ${savedEngine}`, 'system');
+    }
     
     if (savedCookiesMap) {
       setCookiesMap(JSON.parse(savedCookiesMap));
@@ -457,6 +464,7 @@ export default function Home() {
           quality,
           format,
           cookie: resolvedCookie,
+          engine: downloadEngine,
         }),
       });
 
@@ -602,10 +610,20 @@ export default function Home() {
       <main className="main-layout">
         <h1 className="brand-title">kobo</h1>
         
-        {/* Top Centered Action */}
-        <div className="top-bar-action" onClick={() => { setIsServicesOpen(!isServicesOpen); addLog(`${isServicesOpen ? 'closed' : 'opened'} supported services dropdown`, 'system'); }}>
-          <span>{isServicesOpen ? 'x' : '+'}</span>
-          <span>supported services</span>
+        {/* Top Centered Action Row */}
+        <div className="top-bar-actions-wrapper">
+          <div className="top-bar-action" onClick={() => { setIsServicesOpen(!isServicesOpen); addLog(`${isServicesOpen ? 'closed' : 'opened'} supported services dropdown`, 'system'); }}>
+            <span>{isServicesOpen ? 'x' : '+'}</span>
+            <span>supported services</span>
+          </div>
+          <div className="tooltip-container">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="info-icon" style={{ opacity: 0.6 }}>
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span className="tooltip-text">Supports thousands of extra websites (TikTok, Instagram, Twitter/X, etc.) via custom yt-dlp backend!</span>
+          </div>
         </div>
 
         {/* Supported Services Dropdown */}
@@ -1033,6 +1051,31 @@ export default function Home() {
               </select>
             </div>
 
+            {/* Download Engine */}
+            <div className="form-group" style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+              <label htmlFor="modal-engine">
+                <span className="label-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                  Download Engine
+                </span>
+              </label>
+              <select
+                id="modal-engine"
+                className="input-field"
+                value={downloadEngine}
+                onChange={(e) => {
+                  setDownloadEngine(e.target.value);
+                  addLog(`selected download engine: ${e.target.value}`, 'system');
+                }}
+              >
+                <option value="cobalt">Cobalt API (Default with yt-dlp Fallback)</option>
+                <option value="ytdlp">yt-dlp (Direct via Hugging Face)</option>
+              </select>
+            </div>
+
             {/* Colour Scheme Switcher */}
             <div className="form-group" style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
               <label>
@@ -1085,6 +1128,7 @@ export default function Home() {
               onClick={() => {
                 localStorage.setItem('kobo_cookies_map', JSON.stringify(cookiesMap));
                 localStorage.setItem('kobo_quality', quality);
+                localStorage.setItem('kobo_engine', downloadEngine);
                 setIsSettingsOpen(false);
                 addLog('saved settings configuration successfully', 'success');
               }}

@@ -1,0 +1,22 @@
+<svg width="32" height="32" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ears -->
+  <path d="M25 50L15 20L45 35" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M95 50L105 20L75 35" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Head Outline -->
+  <path d="M25 50C15 65 15 85 30 98C45 110 75 110 90 98C105 85 105 65 95 50C90 42 78 38 60 38C42 38 30 42 25 50Z" fill="black" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Forehead Stripes -->
+  <path d="M60 46L60 56" stroke="white" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M52 48L55 56" stroke="white" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M68 48L65 56" stroke="white" stroke-width="5.5" stroke-linecap="round"/>
+  <!-- Eyes -->
+  <path d="M36 68C40 64 45 64 49 68" stroke="white" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M71 68C75 64 80 64 84 68" stroke="white" stroke-width="5.5" stroke-linecap="round"/>
+  <!-- Cheeks -->
+  <path d="M24 74L30 74" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M96 74L90 74" stroke="white" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Nose & Mouth -->
+  <path d="M56 76C58 74 62 74 64 76" stroke="white" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M52 83C56 86 60 86 60 83C60 86 64 86 68 83" stroke="white" stroke-width="5.5" stroke-linecap="round"/>
+  <!-- Paws Folded -->
+  <path d="M42 98C50 94 70 94 78 98" stroke="white" stroke-width="6" stroke-linecap="round"/>
+</svg>

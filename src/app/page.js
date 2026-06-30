@@ -179,6 +179,7 @@ export default function Home() {
   // Collapsed TUI scroll states
   const [collapsedScrollIndex, setCollapsedScrollIndex] = useState(0);
   const [isLogsExpanded, setIsLogsExpanded] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   
   // Customization
   const [theme, setTheme] = useState('classic'); // classic, slate, mocha, dracula
@@ -580,13 +581,13 @@ export default function Home() {
             </svg>
             <span>donate</span>
           </button>
-          <button className="sidebar-btn" onClick={() => { window.open('https://github.com/Hotaro26', '_blank'); addLog('redirecting to github repo', 'system'); }}>
+          <button className="sidebar-btn" onClick={() => { window.open('https://github.com/Hotaro26/kobo', '_blank'); addLog('redirecting to github repo', 'system'); }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
             </svg>
             <span>star</span>
           </button>
-          <button className="sidebar-btn" onClick={() => { alert('Kobo Downloader v1.0.0\nPowered by Cobalt API'); addLog('triggered about dialog', 'system'); }}>
+          <button className="sidebar-btn" onClick={() => { setIsAboutOpen(true); addLog('opened about modal', 'system'); }}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -672,9 +673,27 @@ export default function Home() {
               {detectedBrand && BRAND_ICONS[detectedBrand] ? (
                 BRAND_ICONS[detectedBrand]()
               ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                <svg width="18" height="18" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Ears */}
+                  <path d="M25 50L15 20L45 35" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M95 50L105 20L75 35" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Head Outline */}
+                  <path d="M25 50C15 65 15 85 30 98C45 110 75 110 90 98C105 85 105 65 95 50C90 42 78 38 60 38C42 38 30 42 25 50Z" fill="black" stroke="currentColor" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+                  {/* Forehead Stripes */}
+                  <path d="M60 46L60 56" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round"/>
+                  <path d="M52 48L55 56" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round"/>
+                  <path d="M68 48L65 56" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round"/>
+                  {/* Eyes */}
+                  <path d="M36 68C40 64 45 64 49 68" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round"/>
+                  <path d="M71 68C75 64 80 64 84 68" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round"/>
+                  {/* Cheeks */}
+                  <path d="M24 74L30 74" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round"/>
+                  <path d="M96 74L90 74" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round"/>
+                  {/* Nose & Mouth */}
+                  <path d="M56 76C58 74 62 74 64 76" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round"/>
+                  <path d="M52 83C56 86 60 86 60 83C60 86 64 86 68 83" stroke="currentColor" strokeWidth="5.5" strokeLinecap="round"/>
+                  {/* Paws Folded */}
+                  <path d="M42 98C50 94 70 94 78 98" stroke="currentColor" strokeWidth="6" strokeLinecap="round"/>
                 </svg>
               )}
             </div>
@@ -847,8 +866,19 @@ export default function Home() {
         )}
 
         {/* Footer Ethics Text */}
-        <footer className="footer-text">
-          by continuing, you agree to <a href="#" target="_blank" rel="noopener noreferrer">terms and ethics of use</a>
+        <footer className="footer-text" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span>developed by</span>
+          <a 
+            href="https://github.com/Hotaro26" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', textDecoration: 'none', color: 'var(--foreground)', fontWeight: '500' }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+            Hotaro
+          </a>
         </footer>
       </main>
 
@@ -1289,6 +1319,109 @@ export default function Home() {
                 Download
               </a>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ABOUT MODAL */}
+      {isAboutOpen && (
+        <div className="modal-backdrop" onClick={() => { setIsAboutOpen(false); addLog('closed about modal via backdrop click', 'system'); }}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px', padding: '28px' }}>
+            <div className="modal-header" style={{ marginBottom: '16px' }}>
+              <h3>About Kobo</h3>
+              <button className="modal-close" onClick={() => { setIsAboutOpen(false); addLog('closed about modal', 'system'); }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginTop: '12px' }}>
+              {/* Left Column: Tech Info */}
+              <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', textAlign: 'center' }}>
+                {/* Mascot */}
+                <svg width="60" height="60" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M25 50L15 20L45 35" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M95 50L105 20L75 35" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M25 50C15 65 15 85 30 98C45 110 75 110 90 98C105 85 105 65 95 50C90 42 78 38 60 38C42 38 30 42 25 50Z" fill="black" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M60 46L60 56" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M52 48L55 56" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M68 48L65 56" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M36 68C40 64 45 64 49 68" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M71 68C75 64 80 64 84 68" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M24 74L30 74" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+                  <path d="M96 74L90 74" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
+                  <path d="M56 76C58 74 62 74 64 76" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M52 83C56 86 60 86 60 83C60 86 64 86 68 83" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                  <path d="M42 98C50 94 70 94 78 98" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round"/>
+                </svg>
+
+                <div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: '600' }}>Kobo Downloader</h4>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--accent)', fontFamily: 'monospace' }}>v1.0.0</span>
+                </div>
+
+                <p style={{ fontSize: '0.78rem', color: 'var(--muted-hover)', lineHeight: '1.4' }}>
+                  A clean, minimalist media downloader built on Next.js. It leverages the Cobalt API to stream media directly to your device, bypassing trackers and ads.
+                </p>
+
+                <div style={{ width: '100%', borderTop: '1px solid var(--border)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.72rem', textAlign: 'left' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--muted)' }}>Author:</span>
+                    <a href="https://github.com/Hotaro26" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--foreground)', textDecoration: 'none', fontWeight: '500' }}>Hotaro</a>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--muted)' }}>Core Engine:</span>
+                    <span style={{ color: 'var(--foreground)' }}>Cobalt API</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--muted)' }}>Source Code:</span>
+                    <a href="https://github.com/Hotaro26/kobo" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--foreground)', textDecoration: 'none', fontWeight: '500' }}>GitHub Repo</a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Sideways Story Box */}
+              <div style={{ 
+                flex: '1 1 280px', 
+                background: 'rgba(255, 255, 255, 0.01)', 
+                border: '1px dashed var(--border)', 
+                padding: '20px', 
+                borderRadius: '12px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                fontSize: '0.8rem',
+                lineHeight: '1.5'
+              }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 20h9"></path>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                  </svg>
+                  The Story
+                </h4>
+                <p style={{ color: 'var(--foreground)' }}>
+                  I use Pinterest constantly. When I needed to save media from it, I searched the internet only to find absolutely nothing useful.
+                </p>
+                <p style={{ color: 'var(--muted-hover)' }}>
+                  The very few downloader tools that did exist were completely flooded with intrusive ads, popups, and slow redirects.
+                </p>
+                <p style={{ color: 'var(--muted-hover)' }}>
+                  I built <strong>Kobo</strong> to solve this. It is designed to be a fast, clean, and completely ad-free alternative that just works.
+                </p>
+              </div>
+            </div>
+
+            <button 
+              type="button" 
+              className="btn" 
+              style={{ background: '#fff', color: '#000', border: 'none', marginTop: '20px', fontWeight: '600' }}
+              onClick={() => { setIsAboutOpen(false); addLog('closed about modal', 'system'); }}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
